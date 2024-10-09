@@ -59,6 +59,7 @@ class SignInFragment : Fragment() {
 
                 if (checkUser(user)) {
                     showToast("Авторизация успешно пройдена!")
+                    findNavController().navigate(R.id.action_signInFragment_to_messengerFragment)
                 } else {
                     showToast("Неверный логин или пароль!")
                 }

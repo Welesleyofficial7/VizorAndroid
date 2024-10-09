@@ -16,6 +16,13 @@
     </fragment>
 
     <fragment
+        android:id="@+id/messengerFragment"
+        android:name="com.example.mobfirstlaba.MessengerFragment"
+        android:label="MessengerFragment"
+        tools:layout="@layout/fragment_messenger" />
+
+
+    <fragment
         android:id="@+id/signUpFragment"
         android:name="com.example.mobfirstlaba.SignUpFragment"
         android:label="SignUpFragment"
@@ -49,6 +56,10 @@
         <action
             android:id="@+id/action_signInFragment_to_signUpFragment"
             app:destination="@id/signUpFragment" />
+        <action
+            android:id="@+id/action_signInFragment_to_messengerFragment"
+            app:destination="@id/messengerFragment" />
     </fragment>
+
 
 </navigation>

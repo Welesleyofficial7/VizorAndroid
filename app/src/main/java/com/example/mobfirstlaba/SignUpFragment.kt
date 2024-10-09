@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.fragment.findNavController
@@ -61,10 +62,8 @@ class SignUpFragment : Fragment() {
 //                    putString("password", password)
 //                }
                 val user = User(email, password, username)
-
-                val action = SignUpFragmentDirections.actionSignUpFragmentToSignInFragment(user)
-                findNavController().navigate(action)
-
+                val bundle = bundleOf("user" to user)
+                findNavController().navigate(R.id.action_signUpFragment_to_signInFragment, bundle)
             }
 
         }
