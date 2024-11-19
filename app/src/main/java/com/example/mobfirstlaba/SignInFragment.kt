@@ -13,13 +13,15 @@ import com.example.mobfirstlaba.MainActivity
 import com.example.mobfirstlaba.MessengerFragment
 import com.example.mobfirstlaba.R
 import com.example.mobfirstlaba.SignUpFragment
+import com.example.mobfirstlaba.databinding.FragmentSignInBinding
 import com.example.mobfirstlaba.models.User
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 
 class SignInFragment : Fragment() {
     private val users = mutableListOf<User>()
-
+    private var _binding: FragmentSignInBinding? = null
+    private val binding get() = _binding!!
     private val TAG = "AuthActivity"
 
     @SuppressLint("CutPasteId")
@@ -27,7 +29,9 @@ class SignInFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_sign_in, container, false)
+//        val view = inflater.inflate(R.layout.fragment_sign_in, container, false)
+        _binding = FragmentSignInBinding.inflate(inflater, container, false)
+        val view = binding.root
 
         Log.d(TAG, "onCreateView called")
         initializeUsers()
@@ -41,15 +45,15 @@ class SignInFragment : Fragment() {
             val passwordTextEdit: TextInputEditText = view.findViewById(R.id.password)
             val usernameTextEdit: TextInputEditText = view.findViewById(R.id.username)
 
-            emailTextEdit.setText(user?.email)
-            passwordTextEdit.setText(user?.password)
-            usernameTextEdit.setText(user?.username)
+            binding.email.setText(user?.email)
+            binding.password.setText(user?.password)
+            binding.username.setText(user?.username)
         }
 
         val loginButton: MaterialButton = view.findViewById(R.id.login_button)
         val signUpButton: MaterialButton = view.findViewById(R.id.signup_button)
 
-        loginButton.setOnClickListener {
+        binding.loginButton.setOnClickListener {
             val email = (view.findViewById(R.id.email) as TextInputEditText).text.toString().trim()
             val password = (view.findViewById(R.id.password) as TextInputEditText).text.toString().trim()
             val username = (view.findViewById(R.id.username) as TextInputEditText).text.toString().trim()
@@ -120,5 +124,10 @@ class SignInFragment : Fragment() {
 
     private fun showToast(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

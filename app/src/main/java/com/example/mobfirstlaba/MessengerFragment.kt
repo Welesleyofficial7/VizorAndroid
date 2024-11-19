@@ -14,11 +14,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobfirstlaba.models.Chat
 import com.example.mobfirstlaba.utils.ChatAdapter
+import androidx.lifecycle.lifecycleScope
+import com.example.mobfirstlaba.repository.CharacterRepository
+import com.example.mobfirstlaba.utils.CharacterAdapter
+import kotlinx.coroutines.launch
 
 class MessengerFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var chatAdapter: ChatAdapter
-
+    private lateinit var characterAdapter: CharacterAdapter
+    private val characterRepository = CharacterRepository()
     private val TAG = "MessengerActivity"
 
     @SuppressLint("MissingInflatedId")
@@ -40,11 +45,33 @@ class MessengerFragment : Fragment() {
             Chat("Bob", R.drawable.user_icon, "How's it going?", "10:05 AM"),
         )
 
-        chatAdapter = ChatAdapter(chatList)
-        recyclerView.adapter = chatAdapter
+//        chatAdapter = ChatAdapter(chatList)
+//        recyclerView.adapter = chatAdapter
+//        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        characterAdapter = CharacterAdapter()
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.adapter = characterAdapter
+
+        fetchCharacters()
+
+        return view
+
         return view
     }
+
+    private fun fetchCharacters() {
+        lifecycleScope.launch {
+            val characters = characterRepository.getCharacters()
+            if (characters != null && characters.isNotEmpty()) {
+                characterAdapter.submitList(characters)
+                Log.d("CharacterFragment", "Characters loaded: ${characters.size}")
+            } else {
+                Log.d("CharacterFragment", "No characters loaded or response is empty")
+            }
+        }
+    }
+
 
     override fun onStart() {
         super.onStart()

@@ -15,9 +15,6 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "onCreate called")
         setContentView(R.layout.activity_main)
 
-//        if (savedInstanceState == null) {
-//            navigateToOnboard()  // Начальный экран приложения - фрагмент Onboard
-//        }
     }
 
     override fun onStart() {
@@ -50,41 +47,41 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "onRestart called")
     }
 
-//    fun navigateFromSignUpToSignIn(bundle: Bundle?) {
-//        val signInFragment = SignInFragment()
-//        bundle?.let {
-//            signInFragment.arguments = it
-//        }
-//
-//        supportFragmentManager.commit {
-//            replace(R.id.fragment_container, signInFragment)
-//            addToBackStack(null)
-//        }
-//    }
-//
-//    fun navigateToSignIn() {
-//        supportFragmentManager.commit {
-//            replace<SignInFragment>(R.id.fragment_container)
-//        }
-//    }
-//
-//
-//    fun navigateToSignUp() {
-//        supportFragmentManager.commit {
-//            replace<SignUpFragment>(R.id.fragment_container)
-//            addToBackStack(null)
-//        }
-//    }
-//
-//    fun navigateToHome() {
-//        supportFragmentManager.commit {
-//            replace<MessengerFragment>(R.id.fragment_container)
-//        }
-//    }
-//
-//    fun navigateToOnboard() {
-//        supportFragmentManager.commit {
-//            replace<OnboardFragment>(R.id.fragment_container)
-//        }
-//    }
+    fun navigateFromSignUpToSignIn(bundle: Bundle?) {
+        val signInFragment = SignInFragment()
+        bundle?.let {
+            signInFragment.arguments = it
+        }
+
+        supportFragmentManager.commit {
+            replace(R.id.nav_host_fragment, signInFragment)
+            addToBackStack(null)
+        }
+    }
+
+    fun navigateToSignIn() {
+        supportFragmentManager.commit {
+            replace<SignInFragment>(R.id.nav_host_fragment)
+        }
+    }
+
+
+    fun navigateToSignUp() {
+        supportFragmentManager.commit {
+            replace<SignUpFragment>(R.id.nav_host_fragment)
+            addToBackStack(null)
+        }
+    }
+
+    fun navigateToHome() {
+        supportFragmentManager.commit {
+            replace<MessengerFragment>(R.id.nav_host_fragment)
+        }
+    }
+
+    fun navigateToOnboard() {
+        supportFragmentManager.commit {
+            replace<OnboardFragment>(R.id.nav_host_fragment)
+        }
+    }
 }
