@@ -42,7 +42,6 @@ class SettingsFragment : Fragment() {
         val languageEditText = view.findViewById<EditText>(R.id.editTextLanguage)
         val saveButton = view.findViewById<Button>(R.id.buttonSave)
 
-        // Load saved preferences
         emailEditText.setText(appSettings.email)
         fontSizeEditText.setText(appSettings.fontSize.toString())
         languageEditText.setText(appSettings.language.toString())
@@ -57,7 +56,6 @@ class SettingsFragment : Fragment() {
 //            }
         }
 
-        // Save preferences
         saveButton.setOnClickListener {
             appSettings.email = emailEditText.text.toString()
             appSettings.fontSize = fontSizeEditText.text.toString().toFloatOrNull() ?: 14f
