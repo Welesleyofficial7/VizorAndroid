@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.mobfirstlaba.models.Chat
 import com.example.mobfirstlaba.utils.ChatAdapter
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.example.mobfirstlaba.repository.CharacterRepository
 import com.example.mobfirstlaba.utils.CharacterAdapter
 import kotlinx.coroutines.launch
@@ -38,6 +40,11 @@ class MessengerFragment : Fragment() {
             insets
         }
 
+        val nextButton = view.findViewById<Button>(R.id.buttonGoToHome)
+        nextButton.setOnClickListener {
+            findNavController().navigate(R.id.action_messengerFragment_to_settingsFragment)
+        }
+
         recyclerView = view.findViewById(R.id.recyclerView)
 
         val chatList = listOf(
@@ -54,8 +61,6 @@ class MessengerFragment : Fragment() {
         recyclerView.adapter = characterAdapter
 
         fetchCharacters()
-
-        return view
 
         return view
     }
