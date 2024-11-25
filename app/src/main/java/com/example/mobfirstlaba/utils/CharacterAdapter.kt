@@ -14,6 +14,8 @@ import com.example.mobfirstlaba.models.CharacterModel
 class CharacterAdapter :
     ListAdapter<CharacterModel, CharacterAdapter.CharacterViewHolder>(CharacterDiffCallback()) {
 
+
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CharacterViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_character, parent, false)
         return CharacterViewHolder(view)

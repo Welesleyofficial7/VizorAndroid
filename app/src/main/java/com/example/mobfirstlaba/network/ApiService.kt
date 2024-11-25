@@ -8,5 +8,8 @@ import retrofit2.http.Query
 interface ApiService {
     @GET("characters")
     suspend fun getCharacters(): Response<List<CharacterModel>>
+
+    @GET("characters")
+    suspend fun getCharacters(@Query("page") page: Int = 1): Response<List<CharacterModel>>
 }
 
