@@ -34,4 +34,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Save" />
+
+    <TextView
+        android:id="@+id/textFileInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Информация о файле" />
+
+    <Button
+        android:id="@+id/buttonDeleteFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Удалить файл" />
+
+    <Button
+        android:id="@+id/buttonRestoreFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Восстановить файл"
+        android:visibility="gone" />
+
 </LinearLayout>

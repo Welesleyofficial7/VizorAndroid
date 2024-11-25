@@ -2,12 +2,14 @@ package com.example.mobfirstlaba
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -17,9 +19,11 @@ import com.example.mobfirstlaba.models.Chat
 import com.example.mobfirstlaba.utils.ChatAdapter
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.example.mobfirstlaba.models.CharacterModel
 import com.example.mobfirstlaba.repository.CharacterRepository
 import com.example.mobfirstlaba.utils.CharacterAdapter
 import kotlinx.coroutines.launch
+import java.io.File
 
 class MessengerFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
@@ -65,11 +69,25 @@ class MessengerFragment : Fragment() {
         return view
     }
 
+
+
+    private fun saveHeroesToExternalStorage(heroes: List<CharacterModel>) {
+        val heroNames = heroes.map { it.name } // Assuming `CharacterModel` has a `name` field
+        val fileName = "heroes_1.txt"
+        val repository = CharacterRepository()
+        if (repository.saveHeroesToFile(requireContext(), heroNames, fileName)) {
+            Log.d("SettingsFragment", "File $fileName successfully saved.")
+        } else {
+            Log.e("SettingsFragment", "Failed to save file $fileName.")
+        }
+    }
+
     private fun fetchCharacters() {
         lifecycleScope.launch {
             val characters = characterRepository.getCharacters()
             if (characters != null && characters.isNotEmpty()) {
                 characterAdapter.submitList(characters)
+                saveHeroesToExternalStorage(characters)
                 Log.d("CharacterFragment", "Characters loaded: ${characters.size}")
             } else {
                 Log.d("CharacterFragment", "No characters loaded or response is empty")

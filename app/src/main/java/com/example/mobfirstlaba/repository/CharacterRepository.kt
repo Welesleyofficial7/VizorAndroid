@@ -1,8 +1,11 @@
 package com.example.mobfirstlaba.repository
 
+import android.content.Context
+import android.os.Environment
 import android.util.Log
 import com.example.mobfirstlaba.models.CharacterModel
 import com.example.mobfirstlaba.network.ApiClient
+import java.io.File
 
 class CharacterRepository {
     private val apiService = ApiClient.apiService
@@ -21,5 +24,19 @@ class CharacterRepository {
             emptyList()
         }
     }
-}
 
+    fun saveHeroesToFile(context: Context, heroes: List<String?>, fileName: String): Boolean {
+        val externalStorage = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+        if (!externalStorage.exists()) {
+            externalStorage.mkdir()
+        }
+        val file = File(externalStorage, fileName)
+        return try {
+            file.writeText(heroes.joinToString("\n"))
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+}
