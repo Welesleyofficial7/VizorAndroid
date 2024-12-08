@@ -48,7 +48,7 @@ android {
 }
 
 kotlin {
-    jvmToolchain(17) // Используем JDK 17
+    jvmToolchain(17) 
 }
 
 java {

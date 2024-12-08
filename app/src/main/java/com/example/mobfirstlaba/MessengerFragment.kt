@@ -20,13 +20,18 @@ import com.example.mobfirstlaba.models.Chat
 import com.example.mobfirstlaba.utils.ChatAdapter
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.example.mobfirstlaba.databinding.FragmentMessengerBinding
 import com.example.mobfirstlaba.models.CharacterModel
 import com.example.mobfirstlaba.repository.CharacterRepository
 import com.example.mobfirstlaba.utils.CharacterAdapter
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 
 class MessengerFragment : Fragment() {
+    private var _binding: FragmentMessengerBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var recyclerView: RecyclerView
     private lateinit var chatAdapter: ChatAdapter
     private lateinit var characterAdapter: CharacterAdapter
@@ -37,20 +42,17 @@ class MessengerFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater,container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         super.onCreate(savedInstanceState)
-        val view = inflater.inflate(R.layout.fragment_messenger, container, false)
-        Log.d(TAG, "onCreate called")
-        ViewCompat.setOnApplyWindowInsetsListener(view.findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+
+        _binding = FragmentMessengerBinding.inflate(inflater, container, false)
+        val view = binding.root
 
         characterRepository = CharacterRepository(requireContext())
 
-        val nextButton = view.findViewById<Button>(R.id.buttonGoToHome)
-        nextButton.setOnClickListener {
+
+        binding.buttonGoToSettings.setOnClickListener {
             findNavController().navigate(R.id.action_messengerFragment_to_settingsFragment)
         }
+
 
         recyclerView = view.findViewById(R.id.recyclerView)
 
@@ -64,19 +66,17 @@ class MessengerFragment : Fragment() {
 //        recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         characterAdapter = CharacterAdapter()
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.adapter = characterAdapter
+        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerView.adapter = characterAdapter
 
-        val updateButton = view.findViewById<Button>(R.id.buttonUpdateCharacters)
-        updateButton.setOnClickListener {
-            fetchCharactersFromApi()
+
+        binding.buttonUpdateCharacters.setOnClickListener {
+            clearDataAndFetchCharacters()
         }
 
-        val pageInput = view.findViewById<EditText>(R.id.pageInput)
-        val goToPageButton = view.findViewById<Button>(R.id.buttonGoToPage)
 
-        goToPageButton.setOnClickListener {
-            val page = pageInput.text.toString().toIntOrNull() ?: 1
+        binding.buttonGoToPage.setOnClickListener {
+            val page = binding.pageInput.text.toString().toIntOrNull() ?: 1
             lifecycleScope.launch {
                 val characters = characterRepository.getCharactersByPage(page)
                 if (!characters.isNullOrEmpty()) {
@@ -125,6 +125,15 @@ class MessengerFragment : Fragment() {
         }
     }
 
+    private fun clearDataAndFetchCharacters() {
+        lifecycleScope.launch {
+            binding.progressBar.visibility = View.VISIBLE
+            characterAdapter.submitList(emptyList())
+            delay(500) // Simulate a slight delay for clearing the data
+            fetchCharactersFromApi()
+            binding.progressBar.visibility = View.GONE
+        }
+    }
 
 //    private fun fetchCharacters() {
 //        lifecycleScope.launch {
@@ -154,15 +163,28 @@ class MessengerFragment : Fragment() {
 
     private fun fetchCharacters() {
         lifecycleScope.launch {
-            characterRepository.getCharactersFromDb().collect { charactersInDb ->
+            binding.progressBar.visibility = View.VISIBLE
+            val characters = characterRepository.getCharactersFromDb().collect { charactersInDb ->
                 if (charactersInDb.isNotEmpty()) {
-                    observeCharacters()
-                } else {
-                    fetchCharactersFromApi()
+                    val updatedCharacters = charactersInDb.map { entity ->
+                        entity.playedBy?.let {
+                            CharacterModel(
+                                name = entity.name,
+                                culture = entity.culture,
+                                born = entity.born,
+                                titles = entity.titles?.split(",") ?: emptyList(),
+                                aliases = entity.aliases?.split(",") ?: emptyList(),
+                                playedBy = it.split(",")
+                            )
+                        }
+                    }
+                    characterAdapter.submitList(updatedCharacters)
                 }
             }
+            binding.progressBar.visibility = View.GONE
         }
     }
+
 
     private fun fetchCharactersFromApi() {
         lifecycleScope.launch {

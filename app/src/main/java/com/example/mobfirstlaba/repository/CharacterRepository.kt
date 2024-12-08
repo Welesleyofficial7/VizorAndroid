@@ -9,6 +9,8 @@ import com.example.mobfirstlaba.models.CharacterEntity
 import com.example.mobfirstlaba.models.CharacterModel
 import com.example.mobfirstlaba.network.ApiClient
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
 import java.io.File
 
 class CharacterRepository(context: Context) {
@@ -52,18 +54,41 @@ class CharacterRepository(context: Context) {
     }
 
     suspend fun saveCharactersToDb(characters: List<CharacterModel>) {
-        val entities = characters.map {
-            CharacterEntity(
-                name = it.name,
-                culture = it.culture,
-                born = it.born,
-                titles = it.titles.joinToString(","),
-                aliases = it.aliases.joinToString(","),
-                playedBy = it.playedBy.joinToString(",")
-            )
+        if (characters.isNotEmpty()) {
+            clearDatabase()
+            val entities = characters.map {
+                CharacterEntity(
+                    name = it.name,
+                    culture = it.culture ?: "Unknown", // Provide a default value
+                    born = it.born ?: "Unknown", // Handle null safely
+                    titles = it.titles?.joinToString(",") ?: "", // Handle null safely
+                    aliases = it.aliases?.joinToString(",") ?: "", // Handle null safely
+                    playedBy = it.playedBy?.joinToString(",") ?: "" // Handle null safely
+                )
+            }
+            characterDao.insertCharacters(entities)
         }
-        characterDao.insertCharacters(entities)
     }
+
+
+    suspend fun getCharactersByPage(page: Int): List<CharacterModel>? {
+        return try {
+            val response = apiService.getCharacters(page)
+            if (response.isSuccessful) {
+                val characters = response.body()
+                if (!characters.isNullOrEmpty()) {
+                    saveCharactersToDb(characters)
+                }
+                characters
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            Log.e("CharacterRepository", "Exception: ${e.message}")
+            emptyList()
+        }
+    }
+
 
     suspend fun getCharactersFromDb(): Flow<List<CharacterEntity>> {
         return characterDao.getAllCharacters()
@@ -76,16 +101,5 @@ class CharacterRepository(context: Context) {
     fun observeCharacters(): Flow<List<CharacterEntity>> {
         return characterDao.getAllCharacters()
     }
-
-    suspend fun getCharactersByPage(page: Int): List<CharacterModel>? {
-        return try {
-            val response = apiService.getCharacters(page)
-            if (response.isSuccessful) response.body() else emptyList()
-        } catch (e: Exception) {
-            Log.e("CharacterRepository", "Exception: ${e.message}")
-            emptyList()
-        }
-    }
-
 
 }

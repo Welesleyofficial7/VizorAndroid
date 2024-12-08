@@ -10,3 +10,4 @@ data class CharacterModel(
     val aliases: List<String> = emptyList(),
     val playedBy: List<String> = emptyList()
 )
+
