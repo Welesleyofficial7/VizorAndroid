@@ -32,8 +32,6 @@ class MessengerFragment : Fragment() {
     private var _binding: FragmentMessengerBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var chatAdapter: ChatAdapter
     private lateinit var characterAdapter: CharacterAdapter
     private lateinit var characterRepository: CharacterRepository
     private val TAG = "MessengerActivity"
@@ -53,8 +51,6 @@ class MessengerFragment : Fragment() {
             findNavController().navigate(R.id.action_messengerFragment_to_settingsFragment)
         }
 
-
-        recyclerView = view.findViewById(R.id.recyclerView)
 
         val chatList = listOf(
             Chat("Alice", R.drawable.user_icon, "Hey there!", "10:00 AM"),
@@ -78,9 +74,9 @@ class MessengerFragment : Fragment() {
         binding.buttonGoToPage.setOnClickListener {
             val page = binding.pageInput.text.toString().toIntOrNull() ?: 1
             lifecycleScope.launch {
-                val characters = characterRepository.getCharactersByPage(page)
+                val characters = characterRepository.getCharactersByPage(context=requireContext(), page = page)
                 if (!characters.isNullOrEmpty()) {
-                    characterRepository.saveCharactersToDb(characters)
+                    characterRepository.saveCharactersToDb(requireContext(), characters, "heroes_1.txt")
                 } else {
                     Log.d(TAG, "No characters fetched for page $page")
                 }
@@ -90,7 +86,7 @@ class MessengerFragment : Fragment() {
 
         fetchCharacters()
 
-        return view
+        return binding.root
     }
 
 
@@ -129,7 +125,7 @@ class MessengerFragment : Fragment() {
         lifecycleScope.launch {
             binding.progressBar.visibility = View.VISIBLE
             characterAdapter.submitList(emptyList())
-            delay(500) // Simulate a slight delay for clearing the data
+            delay(500)
             fetchCharactersFromApi()
             binding.progressBar.visibility = View.GONE
         }
@@ -162,7 +158,9 @@ class MessengerFragment : Fragment() {
 //    }
 
     private fun fetchCharacters() {
+
         lifecycleScope.launch {
+            characterRepository.clearDatabase(requireContext(), "heroes_1.txt")
             binding.progressBar.visibility = View.VISIBLE
             val characters = characterRepository.getCharactersFromDb().collect { charactersInDb ->
                 if (charactersInDb.isNotEmpty()) {
@@ -178,7 +176,14 @@ class MessengerFragment : Fragment() {
                             )
                         }
                     }
+                    Log.d("HERE", "NOT FETCHING!!!")
                     characterAdapter.submitList(updatedCharacters)
+                } else {
+                    val characters = characterRepository.getCharacters()
+                    characters?.let {
+                        characterRepository.saveCharactersToDb(requireContext(),it, "heroes_1.txt")
+                    }
+                    Log.d("HERE", "FETCHING!!!")
                 }
             }
             binding.progressBar.visibility = View.GONE
@@ -190,7 +195,7 @@ class MessengerFragment : Fragment() {
         lifecycleScope.launch {
             val characters = characterRepository.getCharacters()
             if (!characters.isNullOrEmpty()) {
-                characterRepository.saveCharactersToDb(characters)
+                characterRepository.saveCharactersToDb(requireContext(), characters, "heroes_1.txt")
                 Log.d(TAG, "Characters fetched from API: ${characters.size}")
             } else {
                 Log.d(TAG, "No characters fetched from API")

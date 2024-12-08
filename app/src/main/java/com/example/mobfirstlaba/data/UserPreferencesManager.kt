@@ -22,13 +22,6 @@ class UserPreferencesManager(context: Context) {
         preferences[NOTIFICATIONS_KEY] ?: true
     }
 
-//    suspend fun setLanguage(language: String) {
-//        dataStore.edit { preferences ->
-//            preferences[LANGUAGE_KEY] = language
-//            println("Language saved: $language") // Debug log
-//        }
-//    }
-
     suspend fun setNotificationsEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[NOTIFICATIONS_KEY] = enabled

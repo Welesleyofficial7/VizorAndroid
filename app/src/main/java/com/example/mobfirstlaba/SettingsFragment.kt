@@ -13,6 +13,8 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.mobfirstlaba.data.UserPreferencesManager
+import com.example.mobfirstlaba.databinding.FragmentMessengerBinding
+import com.example.mobfirstlaba.databinding.FragmentSettingsBinding
 import com.example.mobfirstlaba.models.CharacterModel
 import com.example.mobfirstlaba.repository.CharacterRepository
 import com.example.mobfirstlaba.utils.AppSettings
@@ -22,6 +24,8 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 class SettingsFragment : Fragment() {
+    private var _binding: FragmentSettingsBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var appSettings: AppSettings
     private lateinit var userPreferencesManager: UserPreferencesManager
@@ -32,73 +36,16 @@ class SettingsFragment : Fragment() {
         userPreferencesManager = UserPreferencesManager(requireContext())
     }
 
-    fun isFileExists(fileName: String): Boolean {
-        val externalStorage = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-        val file = File(externalStorage, fileName)
-        return file.exists()
-    }
-
-    fun deleteFile(fileName: String): Boolean {
-        val externalStorage = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-        val file = File(externalStorage, fileName)
-        return file.delete()
-    }
-
-    fun isFileInInternalStorage(fileName: String): Boolean {
-        val internalStorage = requireContext().filesDir
-        val internalFile = File(internalStorage, fileName)
-        return internalFile.exists()
-    }
-
-
-    fun backupFileToInternalStorage(fileName: String): Boolean {
-        val externalStorage = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-        val externalFile = File(externalStorage, fileName)
-
-        if (!externalFile.exists()) return false
-
-        val internalStorage = requireContext().filesDir
-        val internalFile = File(internalStorage, fileName)
-
-        return try {
-            externalFile.copyTo(internalFile, overwrite = true)
-            Log.d("MessengerFragment", "Backup created: $fileName")
-            true
-        } catch (e: Exception) {
-            Log.e("MessengerFragment", "Failed to backup file: $fileName", e)
-            false
-        }
-    }
-
-    fun restoreFileFromInternalStorage(fileName: String): Boolean {
-        val internalStorage = requireContext().filesDir
-        val internalFile = File(internalStorage, fileName)
-
-        if (!internalFile.exists()) return false
-
-        val externalStorage = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-        val externalFile = File(externalStorage, fileName)
-
-        return try {
-            internalFile.copyTo(externalFile, overwrite = true)
-            Log.d("MessengerFragment", "File restored: $fileName")
-            true
-        } catch (e: Exception) {
-            Log.e("MessengerFragment", "Failed to restore file: $fileName", e)
-            false
-        }
-    }
-
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_settings, container, false)
+        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
 
-        val fileInfoTextView = view.findViewById<TextView>(R.id.textFileInfo)
-        val deleteFileButton = view.findViewById<Button>(R.id.buttonDeleteFile)
-        val restoreFileButton = view.findViewById<Button>(R.id.buttonRestoreFile)
+        val fileInfoTextView = binding.textFileInfo
+        val deleteFileButton = binding.buttonDeleteFile
+        val restoreFileButton = binding.buttonRestoreFile
 
         val fileName = "heroes_${1}.txt"
         val fileExistsInExternal = isFileExists(fileName)
@@ -154,11 +101,11 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        val emailEditText = view.findViewById<EditText>(R.id.editTextEmail)
-        val fontSizeEditText = view.findViewById<EditText>(R.id.editTextFontSize)
-        val notificationsSwitch = view.findViewById<Switch>(R.id.switchNotifications)
-        val languageEditText = view.findViewById<EditText>(R.id.editTextLanguage)
-        val saveButton = view.findViewById<Button>(R.id.buttonSave)
+        val emailEditText = binding.editTextEmail
+        val fontSizeEditText = binding.editTextFontSize
+        val notificationsSwitch = binding.switchNotifications
+        val languageEditText = binding.editTextLanguage
+        val saveButton = binding.buttonSave
 
         emailEditText.setText(appSettings.email)
         fontSizeEditText.setText(appSettings.fontSize.toString())
@@ -187,6 +134,64 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        return view
+        return binding.root
+    }
+
+    fun isFileExists(fileName: String): Boolean {
+        val externalStorage = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+        val file = File(externalStorage, fileName)
+        return file.exists()
+    }
+
+    fun deleteFile(fileName: String): Boolean {
+        val externalStorage = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+        val file = File(externalStorage, fileName)
+        Log.d("SettingsFragment", "File path: ${file.absolutePath}, Exists: ${file.exists()}")
+        return file.delete()
+    }
+
+    fun isFileInInternalStorage(fileName: String): Boolean {
+        val internalStorage = requireContext().filesDir
+        val internalFile = File(internalStorage, fileName)
+        return internalFile.exists()
+    }
+
+
+    fun backupFileToInternalStorage(fileName: String): Boolean {
+        val externalStorage = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+        val externalFile = File(externalStorage, fileName)
+
+        if (!externalFile.exists()) return false
+
+        val internalStorage = requireContext().filesDir
+        val internalFile = File(internalStorage, fileName)
+
+        return try {
+            externalFile.copyTo(internalFile, overwrite = true)
+            Log.d("MessengerFragment", "Backup created: $fileName")
+            true
+        } catch (e: Exception) {
+            Log.e("MessengerFragment", "Failed to backup file: $fileName", e)
+            false
+        }
+    }
+
+    fun restoreFileFromInternalStorage(fileName: String): Boolean {
+        val internalStorage = requireContext().filesDir
+        val internalFile = File(internalStorage, fileName)
+
+        if (!internalFile.exists()) return false
+
+        val externalStorage = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+        val externalFile = File(externalStorage, fileName)
+
+        return try {
+            internalFile.copyTo(externalFile, overwrite = true)
+            Log.d("MessengerFragment", "File restored: $fileName")
+            true
+        } catch (e: Exception) {
+            Log.e("MessengerFragment", "Failed to restore file: $fileName", e)
+            false
+        }
     }
 }

@@ -38,46 +38,55 @@ class CharacterRepository(context: Context) {
         }
     }
 
-    fun saveHeroesToFile(context: Context, heroes: List<String?>, fileName: String): Boolean {
-        val externalStorage = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-        if (!externalStorage.exists()) {
-            externalStorage.mkdir()
+    fun saveHeroesToFile(context: Context, characters: List<CharacterModel>, fileName: String): Boolean {
+        val externalStorage = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+        if (externalStorage == null || !externalStorage.exists()) {
+            externalStorage?.mkdir()
         }
         val file = File(externalStorage, fileName)
+        val heroNames = characters.mapNotNull { it.name }
         return try {
-            file.writeText(heroes.joinToString("\n"))
+            file.writeText(heroNames.joinToString("\n"))
+            Log.d("CharacterRepository", "File $fileName successfully saved.")
             true
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("CharacterRepository", "Failed to save file $fileName: ${e.message}")
             false
         }
     }
 
-    suspend fun saveCharactersToDb(characters: List<CharacterModel>) {
+    suspend fun saveCharactersToDb(context: Context, characters: List<CharacterModel>, fileName: String) {
         if (characters.isNotEmpty()) {
-            clearDatabase()
+            clearDatabase(context, fileName)
             val entities = characters.map {
                 CharacterEntity(
                     name = it.name,
-                    culture = it.culture ?: "Unknown", // Provide a default value
-                    born = it.born ?: "Unknown", // Handle null safely
-                    titles = it.titles?.joinToString(",") ?: "", // Handle null safely
-                    aliases = it.aliases?.joinToString(",") ?: "", // Handle null safely
-                    playedBy = it.playedBy?.joinToString(",") ?: "" // Handle null safely
+                    culture = it.culture ?: "Unknown",
+                    born = it.born ?: "Unknown",
+                    titles = it.titles.joinToString(","),
+                    aliases = it.aliases.joinToString(","),
+                    playedBy = it.playedBy.joinToString(",")
                 )
             }
             characterDao.insertCharacters(entities)
+            saveHeroesToFile(context, characters, fileName)
         }
     }
 
 
-    suspend fun getCharactersByPage(page: Int): List<CharacterModel>? {
+    suspend fun clearDatabase(context: Context, fileName: String) {
+        characterDao.clearCharacters()
+        saveHeroesToFile(context, emptyList(), fileName)
+    }
+
+
+    suspend fun getCharactersByPage(page: Int, context: Context): List<CharacterModel>? {
         return try {
             val response = apiService.getCharacters(page)
             if (response.isSuccessful) {
                 val characters = response.body()
                 if (!characters.isNullOrEmpty()) {
-                    saveCharactersToDb(characters)
+                    saveCharactersToDb(context, characters, "heroes_1.txt")
                 }
                 characters
             } else {
@@ -92,10 +101,6 @@ class CharacterRepository(context: Context) {
 
     suspend fun getCharactersFromDb(): Flow<List<CharacterEntity>> {
         return characterDao.getAllCharacters()
-    }
-
-    suspend fun clearDatabase() {
-        characterDao.clearCharacters()
     }
 
     fun observeCharacters(): Flow<List<CharacterEntity>> {

@@ -13,8 +13,8 @@ class CharacterViewModel(context: Context) : ViewModel() {
         emit(data)
     }
 
-    suspend fun fetchAndSaveCharacters() {
-        val apiCharacters = repository.getCharacters()
-        apiCharacters?.let { repository.saveCharactersToDb(it) }
-    }
+//    suspend fun fetchAndSaveCharacters() {
+//        val apiCharacters = repository.getCharacters()
+//        apiCharacters?.let { repository.saveCharactersToDb(it) }
+//    }
 }
